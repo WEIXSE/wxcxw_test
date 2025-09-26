@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WXCXW | Минималистичный стритвир</title>
+    <link rel="icon" type="image/svg+xml" href="images/logo.svg">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* Parallax Background with Transparent Image */
+        .parallax-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: url('https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80') center/cover no-repeat;
+            opacity: 0.25;
+            filter: grayscale(100%);
+            transform: translateY(0);
+            transition: transform 0.1s ease-out;
+        }
+
+        .blur-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 2.2rem;
+            font-weight: 900;
+            letter-spacing: -2px;
+            text-transform: uppercase;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #ccc;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #fff;
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-icons {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-icons a {
+            color: #fff;
+            font-size: 1.3rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-icons a:hover {
+            color: #ccc;
+        }
+
+        .cart-count {
+            font-size: 0.8rem;
+            background: #fff;
+            color: #000;
+            border-radius: 50%;
+            padding: 2px 6px;
+            position: relative;
+            top: -10px;
+            left: -5px;
+        }
+
+        /* Cart Modal */
+        .cart-modal {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 400px;
+            height: 100%;
+            background: #111;
+            z-index: 1001;
+            overflow-y: auto;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            padding: 20px;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .cart-modal.open {
+            transform: translateX(0);
+        }
+
+        .close-cart {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: #1a1a1a;
+            border-radius: 5px;
+        }
+
+        .cart-item p {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .cart-item select {
+            background: #2a2a2a;
+            color: #fff;
+            border: none;
+            padding: 5px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+
+        .cart-item button {
+            background: #ff4d4d;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .cart-item button:hover {
+            background: #cc0000;
+        }
+
+        #order-form {
+            margin-top: 30px;
+            padding: 15px;
+            background: #1a1a1a;
+            border-radius: 5px;
+        }
+
+        #order-form input {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #2a2a2a;
+            border: none;
+            color: #fff;
+            border-radius: 5px;
+        }
+
+        #order-form label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        #order-form button {
+            padding: 10px;
+            background: #fff;
+            color: #000;
+            border: none;
+            width: 100%;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        #order-form button:hover {
+            background: #ccc;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 5%;
+        }
+
+        .hero h1 {
+            font-size: 8rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -5px;
+            margin-bottom: 20px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero h1 span {
+            -webkit-text-stroke: 2px #fff;
+            color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            max-width: 600px;
+            opacity: 0.7;
+            margin-bottom: 40px;
+            line-height: 1.6;
+            animation: fadeInUp 1s ease-out 0.2s forwards;
+        }
+
+        .cta-button {
+            padding: 15px 40px;
+            background: #fff;
+            color: #000;
+            border: none;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: fadeInUp 1s ease-out 0.4s forwards;
+            text-decoration: none;
+            display: inline-block;
+            border-radius: 5px;
+        }
+
+        .cta-button:hover {
+            background: #ccc;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 255, 255, 0.2);
+        }
+
+        /* Brand Story Section */
+        .brand-story {
+            padding: 120px 5%;
+            display: flex;
+            align-items: center;
+            gap: 50px;
+        }
+
+        .brand-image {
+            flex: 1;
+            aspect-ratio: 1/1;
+            max-width: 500px;
+            overflow: hidden;
+        }
+
+        .brand-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(100%);
+            transition: transform 0.5s ease;
+        }
+
+        .brand-image:hover img {
+            transform: scale(1.05);
+        }
+
+        .brand-content {
+            flex: 1;
+        }
+
+        .brand-content h2 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+            margin-bottom: 30px;
+        }
+
+        .brand-content p {
+            font-size: 1.2rem;
+            line-height: 1.7;
+            opacity: 0.8;
+            margin-bottom: 30px;
+        }
+
+        /* Featured Products Section */
+        .featured-products {
+            padding: 100px 5%;
+            background: #0a0a0a;
+        }
+
+        .section-title {
+            font-size: 4rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+            margin-bottom: 50px;
+            text-align: center;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .product-card {
+            background: #111;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .product-image {
+            width: 100%;
+            aspect-ratio: 1/1;
+            overflow: hidden;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(100%);
+            transition: transform 0.5s ease;
+        }
+
+        .product-card:hover .product-image img {
+            transform: scale(1.05);
+        }
+
+        .product-info {
+            padding: 20px;
+        }
+
+        .product-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .product-price {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            opacity: 0.8;
+        }
+
+        /* Newsletter Section */
+        .newsletter {
+            padding: 100px 5%;
+            text-align: center;
+        }
+
+        .newsletter h2 {
+            font-size: 3rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+            margin-bottom: 20px;
+        }
+
+        .newsletter p {
+            font-size: 1.2rem;
+            opacity: 0.7;
+            margin-bottom: 30px;
+        }
+
+        .newsletter form {
+            max-width: 500px;
+            margin: 0 auto;
+            display: flex;
+            gap: 10px;
+        }
+
+        .newsletter input {
+            padding: 15px;
+            flex: 1;
+            background: #1a1a1a;
+            border: none;
+            color: #fff;
+            font-size: 1rem;
+            border-radius: 5px;
+        }
+
+        /* Shop Section */
+        .shop {
+            padding: 100px 5%;
+        }
+
+        .category-filter {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .category-filter a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 10px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            border-radius: 5px;
+        }
+
+        .category-filter a:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        .category-filter a.active {
+            background: #fff;
+            color: #000;
+        }
+
+        /* Footer */
+        footer {
+            padding: 80px 5% 40px;
+            background: #0a0a0a;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .footer-column h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-column ul li a {
+            color: #fff;
+            text-decoration: none;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .footer-column ul li a:hover {
+            opacity: 1;
+        }
+
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-icons a {
+            color: #fff;
+            font-size: 1.3rem;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            opacity: 1;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .animate {
+            opacity: 0;
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        .scale-animate {
+            opacity: 0;
+            animation: scaleIn 0.8s ease forwards;
+        }
+
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+        .delay-3 { animation-delay: 0.6s; }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .hero h1 { font-size: 6rem; }
+            .section-title { font-size: 3rem; }
+            .brand-story { flex-direction: column; }
+            .brand-image { max-width: 100%; }
+            .product-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 4rem; }
+            .hero p { font-size: 1.1rem; }
+            .nav-links { display: none; }
+            .section-title { font-size: 2.5rem; }
+            .brand-content h2 { font-size: 2.5rem; }
+            .category-filter { flex-wrap: wrap; }
+            .product-grid { grid-template-columns: repeat(1, 1fr); }
+            .cart-modal { width: 100%; }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 { font-size: 2.5rem; }
+            .cta-button { padding: 12px 30px; font-size: 0.9rem; }
+            .newsletter form { flex-direction: column; }
+            .footer-bottom { flex-direction: column; gap: 20px; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background -->
+    <div class="parallax-bg">
+        <div class="blur-overlay"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="logo animate">WXCXW</div>
+        <div class="nav-links">
+            <a href="#" class="animate">Главная</a>
+            <a href="#shop" class="animate delay-1">Магазин</a>
+            <a href="#story" class="animate delay-2">История</a>
+            <a href="#contact" class="animate delay-3">Контакты</a>
+        </div>
+        <div class="nav-icons">
+            <a href="#" class="animate"><i class="fas fa-search"></i></a>
+            <a href="#" class="cart-icon animate delay-1"><i class="fas fa-shopping-bag"></i><span class="cart-count">0</span></a>
+            <a href="#" class="animate delay-2"><i class="fas fa-user"></i></a>
+        </div>
+    </nav>
+
+    <!-- Cart Modal -->
+    <div class="cart-modal">
+        <button class="close-cart">X</button>
+        <h2>Корзина</h2>
+        <div class="cart-content"></div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1 class="animate">WXCXW <span>Вайб</span></h1>
+        <p class="animate delay-1">Повысьте свой стиль с минималистичным стритвиром. Премиум качество, вечные дизайны.</p>
+        <a href="#shop" class="cta-button animate delay-2">Купить сейчас</a>
+    </section>
+
+    <!-- Brand Story Section -->
+    <section class="brand-story" id="story">
+        <div class="brand-image animate">
+            <img src="images/logo.svg" alt="Изображение бренда">
+        </div>
+        <div class="brand-content">
+            <h2 class="animate">Наша история</h2>
+            <p class="animate delay-1">WXCXW — это больше чем одежда, это стиль жизни. Родившийся на улицах, мы создаем минималистичные изделия, сочетающие смелый дизайн с премиум-материалами. Наша миссия — переопределить стритвир с простотой и устойчивостью.</p>
+            <p class="animate delay-2">Каждый худи, футболка и аксессуар созданы с намерением, предлагая стиль, который длится. Присоединяйтесь к движению.</p>
+            <a href="https://t.me/wxcxw_shop" class="cta-button animate delay-3">Узнать больше</a>
+        </div>
+    </section>
+
+    <!-- Featured Products Section -->
+    <section class="featured-products">
+        <h2 class="section-title animate">Избранные</h2>
+        <div class="product-grid">
+            <div class="product-card scale-animate">
+                <div class="product-image">
+                    <img src="images/black-hoodie.png" alt="Чёрный худи" data-category="Худи">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">BLACK HOODIE</h3>
+                    <p class="product-price">3500₽</p>
+                    <a href="#" class="cta-button add-to-cart">Добавить в корзину</a>
+                </div>
+            </div>
+            <div class="product-card scale-animate delay-1">
+                <div class="product-image">
+                    <img src="images/white-foot.png" alt="Белая футболка" data-category="Футболки">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">WHITE T-SHIRT</h3>
+                    <p class="product-price">1500₽</p>
+                    <a href="#" class="cta-button add-to-cart">Добавить в корзину</a>
+                </div>
+            </div>
+            <div class="product-card scale-animate delay-2">
+                <div class="product-image">
+                    <img src="images/black-hat.png" alt="Чёрная шапка" data-category="Аксессуары">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">BLACK HAT</h3>
+                    <p class="product-price">800₽</p>
+                    <a href="#" class="cta-button add-to-cart">Добавить в корзину</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Section -->
+    <section class="newsletter">
+        <h2 class="animate">РОЗЫГРЫШ КАЖДЫЙ МЕСЯЦ</h2>
+        <p class="animate delay-1">Присоединяйтесь к нашему сообществу чтобы принять участие в розыгрыше.</p>
+        <form class="animate delay-2">
+            <input type="email" placeholder="Ваш username telegram">
+            <a href="https://t.me/wxcxw_shop" class="cta-button">Подписаться</a>
+        </form>
+    </section>
+
+    <!-- Shop Section -->
+    <section class="shop" id="shop">
+        <h2 class="section-title animate">Магазин</h2>
+        <div class="category-filter animate delay-1">
+            <a href="#" class="active" data-filter="Все">Все</a>
+            <a href="#" data-filter="Худи">Худи</a>
+            <a href="#" data-filter="Свитшоты">Свитшоты</a>
+            <a href="#" data-filter="Футболки">Футболки</a>
+            <a href="#" data-filter="Штаны">Штаны</a>
+            <a href="#" data-filter="Аксессуары">Аксессуары</a>
+        </div>
+        <div class="product-grid">
+            <!-- Hoodies -->
+            <div class="product-card scale-animate" data-category="Худи">
+                <div class="product-image">
+                    <img src="images/black-hoodie.png" alt="Чёрный худи">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">BLACK HOODIE</h3>
+                    <p class="product-price">3500₽</p>
+                    <a href="#" class="cta-button add-to-cart">Добавить в корзину</a>
+                </div>
+            </div>
+            <div class="product-card scale-animate delay-1" data-category="Худи">
+                <div class="product-image">
+                    <img src="images/white-hoodie.png" alt="Белый худи">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">WHITE HOODIE</h3>
+                    <p class="product-price">3500₽</p>
+                    <a href="#" class="cta-button add-to-cart">Добавить в корзину</a>
+                </div>
+            </div>
+            <!-- Sweatshirts -->
+            <div class="product-card scale-animate" data-category="Свитшоты">
+                <div class="product-image">
+                    <img src="images/black-long.png" alt="Чёрный свитшот">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">BLACK LONG</h3>
+                    <p class="product-price">3099₽</p>
+                    <a href="#" class="cta-button add-to-cart">Добавить в корзину</a>
+                </div>
+            </div>
+            <div class="product-card scale-animate delay-1" data-category="Свитшоты">
+                <div class="product-image">
+                    <img src="images/white-long.png" alt="Белый свитшот">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">WHITE LONG</h3>
+                    <p class="product-price">3099₽</p>
+                    <a href="#" class="cta-button add-to-cart">Добавить в корзину</a>
+                </div>
+            </div>
+            <!-- T-Shirts -->
+            <div class="product-card scale-animate" data-category="Футболки">
+                <div class="product-image">
+                    <img src="images/black-foor.png" alt="Чёрная футболка">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">BLACK T-SHIRT</h3>
+                    <p class="product-price">1500₽</p>
+                    <a href="#" class="cta-button add-to-cart">Добавить в корзину</a>
+                </div>
+            </div>
+            <div class="product-card scale-animate delay-1" data-category="Футболки">
+                <div class="product-image">
+                    <img src="images/white-foot.png" alt="Белая футболка">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">WHITE T-SHIRT</h3>
+                    <p class="product-price">1500₽</p>
+                    <a href="#" class="cta-button add-to-cart">Добавить в корзину</a>
+                </div>
+            </div>
+            <!-- Pants -->
+            <div class="product-card scale-animate" data-category="Штаны">
+                <div class="product-image">
+                    <img src="images/black-shtan.png" alt="Чёрные штаны">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">BLACK TROUSERS</h3>
+                    <p class="product-price">2500₽</p>
+                    <a href="#" class="cta-button add-to-cart">Добавить в корзину</a>
+                </div>
+            </div>
+            <div class="product-card scale-animate delay-1" data-category="Штаны">
+                <div class="product-image">
+                    <img src="images/white-shtan.png" alt="Белые штаны">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">WHITE TROUSERS</h3>
+                    <p class="product-price">2500₽</p>
+                    <a href="#" class="cta-button add-to-cart">Добавить в корзину</a>
+                </div>
+            </div>
+            <!-- Beanies -->
+            <div class="product-card scale-animate" data-category="Аксессуары">
+                <div class="product-image">
+                    <img src="images/black-hat.png" alt="Чёрная шапка">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">BLACK HAT</h3>
+                    <p class="product-price">800₽</p>
+                    <a href="#" class="cta-button add-to-cart">Добавить в корзину</a>
+                </div>
+            </div>
+            <div class="product-card scale-animate delay-1" data-category="Аксессуары">
+                <div class="product-image">
+                    <img src="images/white-hat.png" alt="Белая шапка">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">WHITE HAT</h3>
+                    <p class="product-price">800₽</p>
+                    <a href="#" class="cta-button add-to-cart">Добавить в корзину</a>
+                </div>
+            </div>
+            <!-- Socks -->
+            <div class="product-card scale-animate" data-category="Аксессуары">
+                <div class="product-image">
+                    <img src="images/Носки.png" alt="Короткие носки">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">SMALL SOCKS</h3>
+                    <p class="product-price">500₽</p>
+                    <a href="#" class="cta-button add-to-cart">Добавить в корзину</a>
+                </div>
+            </div>
+            <div class="product-card scale-animate" data-category="Аксессуары">
+                <div class="product-image">
+                    <img src="images/sharf.png" alt="Чёрный шарф">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">BLACK SCARF</h3>
+                    <p class="product-price">800₽</p>
+                    <a href="#" class="cta-button add-to-cart">Добавить в корзину</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="footer-grid">
+            <div class="footer-column">
+                <h3>Магазин</h3>
+                <ul>
+                    <li><a href="#shop">Новинки</a></li>
+                    <li><a href="#shop">Бестселлеры</a></li>
+                    <li><a href="#shop">Коллекции</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>О нас</h3>
+                <ul>
+                    <li><a href="#story">Наша история</a></li>
+                    <li><a href="#">Миссия</a></li>
+                    <li><a href="#">Контакты</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Помощь</h3>
+                <ul>
+                    <li><a href="dostavka.html">Доставка</a></li>
+                    <li><a href="vozvrat.html">Возвраты</a></li>
+                    <li><a href="faq.html">FAQ</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>УЧАСТВУЙ В РОЗЫГРЫШЕ</h3>
+                <p>Подпишитесь на телеграм канал и оставьте ваш username.</p>
+                <input type="email" placeholder="Ваш username" style="padding: 12px; width: 100%; margin-bottom: 15px; background: #1a1a1a; border: none; color: #fff; border-radius: 5px;">
+                <a href="https://t.me/wxcxw_shop" class="cta-button" style="width: 100%; text-align: center;">Подписаться</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2025 WXCXW BRAND. Все права защищены.</p>
+            <div class="social-icons">
+                <a href="https://t.me/wxcxw_shop"><i class="fab fa-telegram"></i></a>
+                <a href="https://vk.com/wxcxw.brand"><i class="fab fa-vk"></i></a>
+            </div>  
+        </div>
+    </footer>
+
+    <script>
+        // Scroll Animations and Parallax
+        document.addEventListener('DOMContentLoaded', () => {
+            const animatedElements = document.querySelectorAll('.animate, .scale-animate');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = 1;
+                        entry.target.style.animationPlayState = 'running';
+                    }
+                });
+            }, { threshold: 0.2 });
+
+            animatedElements.forEach(element => {
+                element.style.opacity = 0;
+                observer.observe(element);
+            });
+
+            // Parallax Effect
+            window.addEventListener('scroll', () => {
+                const bg = document.querySelector('.parallax-bg');
+                bg.style.transform = `translateY(${window.scrollY * 0.3}px)`;
+            });
+
+            // Smooth Scroll for Anchor Links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', (e) => {
+                    if (!anchor.classList.contains('add-to-cart') && !anchor.classList.contains('category-filter')) {
+                        e.preventDefault();
+                        const target = document.querySelector(anchor.getAttribute('href'));
+                        if (target) {
+                            target.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    }
+                });
+            });
+
+            // Category Filter
+            const filterButtons = document.querySelectorAll('.category-filter a');
+            const productCards = document.querySelectorAll('.shop .product-card');
+
+            filterButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const filter = button.dataset.filter;
+
+                    // Update active class
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+
+                    // Filter products
+                    productCards.forEach(card => {
+                        if (filter === 'Все' || card.dataset.category === filter) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            });
+
+            // Cart Functionality
+            let cart = [];
+            const cartModal = document.querySelector('.cart-modal');
+            const cartContent = document.querySelector('.cart-content');
+            const cartIcon = document.querySelector('.cart-icon');
+            const cartCount = document.querySelector('.cart-count');
+            const closeCart = document.querySelector('.close-cart');
+
+            closeCart.addEventListener('click', () => {
+                cartModal.classList.remove('open');
+            });
+
+            cartIcon.addEventListener('click', (e) => {
+                e.preventDefault();
+                cartModal.classList.toggle('open');
+            });
+
+            document.querySelectorAll('.add-to-cart').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const product = btn.closest('.product-card');
+                    const name = product.querySelector('.product-name').textContent;
+                    const price = product.querySelector('.product-price').textContent;
+                    cart.push({ name, price, size: null });
+                    updateCart();
+                });
+            });
+
+            function updateCart() {
+                cartContent.innerHTML = '';
+                cart.forEach((item, index) => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.classList.add('cart-item');
+                    itemDiv.innerHTML = `
+                        <p>${item.name} - ${item.price}</p>
+                        <select data-index="${index}">
+                            <option value="" ${!item.size ? 'selected' : ''}>Выберите размер</option>
+                            <option value="44" ${item.size === '44' ? 'selected' : ''}>44</option>
+                            <option value="46" ${item.size === '46' ? 'selected' : ''}>46</option>
+                            <option value="48" ${item.size === '48' ? 'selected' : ''}>48</option>
+                            <option value="50" ${item.size === '50' ? 'selected' : ''}>50</option>
+                            <option value="52" ${item.size === '52' ? 'selected' : ''}>52</option>
+                            <option value="54" ${item.size === '54' ? 'selected' : ''}>54</option>
+                        </select>
+                        <button class="remove-item" data-index="${index}">Удалить</button>
+                    `;
+                    cartContent.appendChild(itemDiv);
+                });
+
+                if (cart.length > 0) {
+                    const form = document.createElement('form');
+                    form.id = 'order-form';
+                    form.innerHTML = `
+                        <input type="tel" name="phone" placeholder="Ваш номер телефона" required>
+                        <input type="text" name="telegram" placeholder="Ваш Telegram username" required>
+                        <input type="email" name="email" placeholder="Ваша почта" required>
+                        <input type="text" name="address" placeholder="Ваш адрес" required>
+                        <label>
+                            <input type="checkbox" name="consent" required> Я согласен с обработкой персональных данных
+                        </label>
+                        <button type="submit">Отправить заказ</button>
+                    `;
+                    cartContent.appendChild(form);
+
+                    form.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        const formData = new FormData(form);
+                        const phone = formData.get('phone');
+                        const telegram = formData.get('telegram');
+                        const email = formData.get('email');
+                        const address = formData.get('address');
+
+                        // Check if all items have a size selected
+                        if (cart.some(item => !item.size)) {
+                            alert('Пожалуйста, выберите размер для всех товаров в корзине.');
+                            return;
+                        }
+
+                        // Prepare order message
+                        let orderMessage = '<b>Новый заказ!</b>\n\n';
+                        orderMessage += '<b>Товары:</b>\n';
+                        cart.forEach(item => {
+                            orderMessage += `- ${item.name} (Размер: ${item.size}) - ${item.price}\n`;
+                        });
+                        orderMessage += `\n<b>Данные клиента:</b>\n`;
+                        orderMessage += `Телефон: ${phone}\n`;
+                        orderMessage += `Telegram: ${telegram}\n`;
+                        orderMessage += `Email: ${email}\n`;
+                        orderMessage += `Адрес: ${address}\n`;
+
+                        // Send to Telegram
+                        const botToken = '8382828624:AAFN0aASOp-LEbVoTAh0E46uIJQIqPLAg4E';
+                        const chatId = '8492358747';
+                        const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+
+                        try {
+                            const response = await fetch(telegramUrl, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    chat_id: chatId,
+                                    text: orderMessage,
+                                    parse_mode: 'HTML'
+                                })
+                            });
+
+                            if (response.ok) {
+                                alert('Заказ успешно отправлен!');
+                                cart = [];
+                                updateCart();
+                                cartModal.classList.remove('open');
+                            } else {
+                                alert('Ошибка при отправке заказа. Попробуйте снова.');
+                            }
+                        } catch (error) {
+                            console.error('Ошибка:', error);
+                            alert('Произошла ошибка при отправке заказа.');
+                        }
+                    });
+                }
+
+                cartCount.textContent = cart.length;
+
+                // Handle size selection
+                cartContent.querySelectorAll('select').forEach(select => {
+                    select.addEventListener('change', (e) => {
+                        const index = e.target.dataset.index;
+                        cart[index].size = e.target.value;
+                    });
+                });
+
+                // Handle item removal
+                cartContent.querySelectorAll('.remove-item').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const index = e.target.dataset.index;
+                        cart.splice(index, 1);
+                        updateCart();
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>
